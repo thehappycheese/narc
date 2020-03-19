@@ -91,7 +91,7 @@ class Path(object):
 	
 	
 	def arcpy_delete(self):
-		if arcpy.Exists(self._path):
+		if self.arcpy_exists():
 			thou_shalt(
 				"Delete "+self.filename(),
 				lambda: arcpy.Delete_management(self._path)
