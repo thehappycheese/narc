@@ -19,15 +19,26 @@ class Path(object):
 	def __init__(self, *args):
 		self._path = ""
 		self._desc = None
+		self._exists = None  # TODO: ensure that this gets blanked after every opperation that might change it.
 		for item in args:
 			self._path = os.path.join(self._path, str(item))
+		self._guess_filename = "\\".join(self._path.split("\\")[-1])
+		self._guess_path = "\\".join(self._path.split("\\")[:-1])
+	
+	@property
+	def exists(self):
+		return self.arcpy_exists()
 	
 	def arcpy_exists(self):
-		return arcpy.Exists(self._path)
+		if self._exists is None:
+			self._exists = arcpy.Exists(self._path)
+		return  self._exists
 	
 	def arcpy_describe(self):
 		if self._desc is None:
-			self._desc = arcpy.Describe(self._path)
+			if arcpy.Exists(self._path):
+				self._desc = arcpy.Describe(self._path)
+			else:
 		return self._desc
 	
 	def append(self, new_path_part):
@@ -41,14 +52,19 @@ class Path(object):
 		return self.arcpy_describe()
 
 	def folder(self):
-		return self.desc.baseName
+		"""folder path without file name"""
+		return self.desc.path
 
 	def filename(self):
-		return self.desc.file
+		"""filename and extention"""
+		if self.exists:
+			return self.desc.file
+		else:
+			return os.path.basename(self._path)
 	
 	def name(self):
 		"""user assigned name"""
-		return self.desc.file
+		return self.desc.name
 	
 	def path(self):
 		"""including filename / geodatabase name and extentnion"""
@@ -96,13 +112,15 @@ class Path(object):
 				"Delete "+self.filename(),
 				lambda: arcpy.Delete_management(self._path)
 			)
+		self._exists = None
 		return self
 	
 	def arcpy_create_gdb(self):
 		thou_shalt(
 			"Create Geodatabase "+self.filename(),
-			lambda:arcpy.CreateFileGDB_management(self.folder(),self.filename())
+			lambda: arcpy.CreateFileGDB_management(self.folder(), self.filename())
 		)
+		self._exists = None
 		return self
 
 	def arcpy_select_to(self, arg_output_path, where_clause):
