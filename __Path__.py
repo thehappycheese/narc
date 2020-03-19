@@ -22,8 +22,6 @@ class Path(object):
 		self._exists = None  # TODO: ensure that this gets blanked after every opperation that might change it.
 		for item in args:
 			self._path = os.path.join(self._path, str(item))
-		self._guess_filename = "\\".join(self._path.split("\\")[-1])
-		self._guess_path = "\\".join(self._path.split("\\")[:-1])
 	
 	@property
 	def exists(self):
@@ -32,13 +30,14 @@ class Path(object):
 	def arcpy_exists(self):
 		if self._exists is None:
 			self._exists = arcpy.Exists(self._path)
-		return  self._exists
+		return self._exists
 	
 	def arcpy_describe(self):
 		if self._desc is None:
-			if arcpy.Exists(self._path):
+			if self.exists:
 				self._desc = arcpy.Describe(self._path)
 			else:
+				raise Exception("arcpy was unable to describe the following because arcpy thinks it does not exist; '{}'".format(self._path))
 		return self._desc
 	
 	def append(self, new_path_part):
@@ -53,7 +52,10 @@ class Path(object):
 
 	def folder(self):
 		"""folder path without file name"""
-		return self.desc.path
+		if self.exists:
+			return self.desc.path
+		else:
+			return os.path.dirname(self._path)
 
 	def filename(self):
 		"""filename and extention"""
@@ -66,9 +68,11 @@ class Path(object):
 		"""user assigned name"""
 		return self.desc.name
 	
-	def path(self):
-		"""including filename / geodatabase name and extentnion"""
-		return self.desc.catalogPath
+	def path(self):  # TODO: this may be redundant
+		"""full path including filename / geodatabase name and extentnion"""
+		if self.exists:
+			return self.desc.catalogPath
+		return self._path
 	
 	def children(self):
 		return [Path(item.catalogPath) for item in self.desc.children]
