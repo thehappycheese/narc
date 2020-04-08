@@ -301,10 +301,10 @@ class Path(object):
 			lambda: arcpy.Append_management([str(item) for item in input_features_list],str(self))
 		)
 	
-	def arcpy_create_routes_linear_refernancing_from(self, arg_input_path, segment_identifier_column="NETWORK_ELEMENT", start_column="START_TRUE_DIST", end_column="END_TRUE_DIST"):
+	def arcpy_create_routes_linear_refernancing_from(self, arg_input_path, route_id_field="NETWORK_ELEMENT", start_column="START_TRUE_DIST", end_column="END_TRUE_DIST"):
 		arg_input_path = Path(arg_input_path)
 		thou_shalt("Create Linear Referanceable Layer {} from {}".format(self.shortened_name_with_context(), arg_input_path.shortened_name_with_context()),
-			lambda: arcpy.CreateRoutes_lr(str(arg_input_path), segment_identifier_column, str(self), "TWO_FIELDS", start_column, end_column)
+			lambda: arcpy.CreateRoutes_lr(str(arg_input_path), route_id_field, str(self), "TWO_FIELDS", start_column, end_column)
 		)
 		return self
 		
