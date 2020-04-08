@@ -48,7 +48,10 @@ class Path(object):
 	
 	@property
 	def desc(self):
-		return self.arcpy_describe()
+		try:
+			return self.arcpy_describe()
+		except:
+			return None
 
 	def folder(self):
 		"""folder path without file name"""
@@ -87,16 +90,17 @@ class Path(object):
 		return self.data_type() == ARCPY_DATA_TYPE.FeatureClass
 
 	def shortened_name_with_context(self):
-		if self.is_workspace():
-			return self.filename()
-		elif self.is_feature_class():  # TODO: assumes feature classes are always inside a geodatabase
-			# return the path upto and including the partne geodatabase "some.gdb\\folder\\featureclass"
-			d = self._path.split("\\")
-			try:
-				ds = next(index for index, value in enumerate(d) if value[-4:] == ".gdb")
-			except StopIteration:
-				ds = -2
-			return "\\".join(d[ds:])
+		if self.desc:
+			if self.is_workspace():
+				return self.filename()
+			elif self.is_feature_class():  # TODO: assumes feature classes are always inside a geodatabase
+				# return the path upto and including the partne geodatabase "some.gdb\\folder\\featureclass"
+				d = self._path.split("\\")
+				try:
+					ds = next(index for index, value in enumerate(d) if value[-4:] == ".gdb")
+				except StopIteration:
+					ds = -2
+				return "\\".join(d[ds:])
 		else:
 			d = self._path.split("\\")
 			if len(d) > 1:
@@ -130,8 +134,8 @@ class Path(object):
 	def arcpy_select_to(self, arg_output_path, where_clause):
 		arg_output_path = Path(arg_output_path)
 		thou_shalt(
-			"Select from\n\t\t%s into\n\t\t%s\n\t\twhere %s"%(self.shortened_name_with_context(),arg_output_path.shortened_name_with_context(),where_clause),
-			lambda:arcpy.Select_analysis(self._path,str(arg_output_path),where_clause=where_clause)
+			"Select from\n\t\t%s into\n\t\t%s\n\t\twhere %s" % (self.shortened_name_with_context(), arg_output_path.shortened_name_with_context(),where_clause),
+			lambda:arcpy.Select_analysis(self._path, str(arg_output_path), where_clause=where_clause)
 		)
 		return self
 
@@ -194,8 +198,16 @@ class Path(object):
 			lambda: arcpy.FeatureClassToFeatureClass_conversion(self._path, arg_output_path.folder(), arg_output_path.filename(), where_clause, field_mapping, config_keyword)
 		)
 		return self
+	
+	def arcpy_from_feature_class(self, arg_input_path, where_clause=None, field_mapping=None, config_keyword=None):
+		arg_input_path = Path(arg_input_path)
+		thou_shalt(
+			"Create feature class from\n\t\t%s at \n\t\t%s"%(arg_input_path.shortened_name_with_context(), self.shortened_name_with_context()),
+			lambda: arcpy.FeatureClassToFeatureClass_conversion(str(arg_input_path), self.folder(), self.filename(), where_clause, field_mapping, config_keyword)
+		)
+		return self
 
-	def arcpy_get_unique_field_values(self,arg_field_name):
+	def arcpy_get_unique_field_values(self, arg_field_name):
 		"""Extract sorted list of unique values from a chosen field"""
 		# next line uses python 'set comprehension'... basically an inline for-loop which defines the elements of the set.
 		# Sets automatically only retain one of each unique item (as youmight expect)
@@ -301,7 +313,7 @@ class Path(object):
 			lambda: arcpy.Append_management([str(item) for item in input_features_list],str(self))
 		)
 	
-	def arcpy_create_routes_linear_refernancing_from(self, arg_input_path, route_id_field="NETWORK_ELEMENT", start_column="START_TRUE_DIST", end_column="END_TRUE_DIST"):
+	def arcpy_create_routes_linear_refernancing_from(self, arg_input_path, route_id_field="ROAD", start_column="START_TRUE_DIST", end_column="END_TRUE_DIST"):
 		arg_input_path = Path(arg_input_path)
 		thou_shalt("Create Linear Referanceable Layer {} from {}".format(self.shortened_name_with_context(), arg_input_path.shortened_name_with_context()),
 			lambda: arcpy.CreateRoutes_lr(str(arg_input_path), route_id_field, str(self), "TWO_FIELDS", start_column, end_column)
