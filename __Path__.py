@@ -174,7 +174,7 @@ class Path(object):
 	def arcpy_buffer_to(self, arg_output_path, buffer_distance_or_field="20 Meters", dissolve_option="ALL"):
 		arg_output_path = Path(arg_output_path)
 		thou_shalt(
-			"Buffer %s by %s into %s"%(self.filename(), buffer_distance_or_field, arg_output_path.filename()),
+			"Buffer {} by {} into {} with dissolve={}".format(self.filename(), buffer_distance_or_field, arg_output_path.filename(),dissolve_option),
 			lambda: arcpy.Buffer_analysis(str(self), str(arg_output_path), buffer_distance_or_field, dissolve_option=dissolve_option)
 		)
 		return self
