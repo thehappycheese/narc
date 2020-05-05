@@ -44,10 +44,11 @@ class Time_Keeper:
 			return "{} items completed {:.2f} minutes elapsed, {:.2f} minutes remaining".format(self.num_completed_events, self.get_elapsed_minutes(), self.get_remaining_minutes())
 			
 	
-	def itterate_over_list(self, arg_list):
+	def itterate_over_list(self, arg_list, comment):
 		print("")
 		print(">>>>>>>>>>>>>>>>>>>>>>>>>>>")
 		print(">>> Starting Timed Loop: "+self.name)
+		print(">>> "+str(comment))
 		print(">>>>>>>>>>>>>>>>>>>>>>>>>>>")
 		
 		self.num_planned_events = len(arg_list)
@@ -66,3 +67,11 @@ class Time_Keeper:
 		print(">>>")
 		print(">>>>>>>>>>>>>>>>>>>>>>>>>>>")
 		print("")
+
+class Time_Keeper_Context:
+	def __init__(self, time_keeper):
+		self.time_keeper = time_keeper
+	def __enter__(self):
+		print()
+	
+	

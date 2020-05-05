@@ -47,7 +47,7 @@ def thou_shalt(str_commandment_description, lambda_commandment, execute_on_dry_r
 				if error_counter>10:
 					print "ARCPY HATH SINNED! COMMANDMENT "+str(COMMANDMENT_NUMBER)+" hath been broken: Thou hath not "+str_commandment_description
 					print e.message
-				print "ARCPY HATH NOT REPENTED! Thou "+str(error_counter)+" sins follow yee until judgement day"
+				print "Retrying: "+str(error_counter)
 				
 		if flag_not_fulfilled:
 			print "ARCPY, THINE SINS ARE BEYOND MEASURE, THY SOUL WITHOUT REPENT, I STRIKE YEE DOWN AND UNLOAD YEE FROM MEMORY"

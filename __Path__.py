@@ -337,6 +337,20 @@ class Path(object):
 			lambda: arcpy.CreateRoutes_lr(str(arg_input_path), route_id_field, str(self), "TWO_FIELDS", start_column, end_column)
 		)
 		return self
+	
+	def arcpy_linear_reference_to_table(self, arg_features_to_locate, arg_inmem_output_table_name, radius="200 Meters", field_name_route="ROAD", output_field_name_route_match="MCH_ROAD", output_feature_type="POINT", output_field_name_distance_measure="TRUE_DIST"):
+		"""To be called on the route feature
+		:param field_name_route: is the field in this dataset that uniquly identifies the routes."""
+		thou_shalt("Locate Features along routes", #TODO: nice print
+			lambda: arcpy.LocateFeaturesAlongRoutes_lr(
+				in_features=str(arg_features_to_locate),
+				in_routes=str(self),
+				route_id_field=field_name_route,
+				radius_or_tolerance=radius,
+				out_table=str(arg_inmem_output_table_name),
+				out_event_properties=' '.join([output_field_name_route_match, output_feature_type, output_field_name_distance_measure])
+			)
+		)
 		
 	def arcpy_get_in_memory_version(self, where=None):
 		"""returns a Path() object pointing to an in_memory version of this Path"""
