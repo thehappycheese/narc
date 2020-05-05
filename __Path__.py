@@ -182,6 +182,14 @@ class Path(object):
 			lambda: arcpy.Buffer_analysis(str(self), str(arg_output_path), buffer_distance_or_field, dissolve_option=dissolve_option)
 		)
 		return self
+	
+	def arcpy_buffer_from(self, arg_input_path, buffer_distance_or_field="20 Meters", dissolve_option="ALL"):
+		arg_input_path = Path(arg_input_path)
+		thou_shalt(
+			"Buffer {} by {} into {} with dissolve={}".format(self.filename(), buffer_distance_or_field, arg_input_path.filename(), dissolve_option),
+			lambda: arcpy.Buffer_analysis(str(arg_input_path), str(self), buffer_distance_or_field, dissolve_option=dissolve_option)
+		)
+		return self
 
 	def arcpy_dissolve_to(self, arg_output_path, dissolve_field, unsplit_lines="UNSPLIT_LINES"):
 		arg_output_path = Path(arg_output_path)
