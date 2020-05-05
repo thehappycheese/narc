@@ -37,11 +37,12 @@ class Time_Keeper:
 	
 	def get_progress_text(self):
 		if self.num_planned_events is None:
-			return "{} items completed {:.2f} minutes elapsed, {:.2f} minutes remaining".format(self.num_completed_events, self.get_elapsed_minutes(), self.get_remaining_minutes())
+			return "{:.2f} minutes elapsed".format(self.get_elapsed_minutes())
 		elif self.num_completed_events > 0:
 			return "{} of {} items completed {:.2f} minutes elapsed, {:.2f} minutes remaining".format(self.num_completed_events, self.num_planned_events, self.get_elapsed_minutes(), self.get_remaining_minutes())
 		else:
-			return "{:.2f} minutes elapsed, {:.2f} minutes remaining".format(self.get_elapsed_minutes(), self.get_remaining_minutes())
+			return "{} items completed {:.2f} minutes elapsed, {:.2f} minutes remaining".format(self.num_completed_events, self.get_elapsed_minutes(), self.get_remaining_minutes())
+			
 	
 	def itterate_over_list(self, arg_list):
 		print("")
