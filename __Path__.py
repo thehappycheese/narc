@@ -165,16 +165,26 @@ class Path(object):
 		)
 		return self
 		
-	def arcpy_clip_to(self, clip_features, arg_output_path, cluster_tolerance=None):
+	def arcpy_clip_to(self, clip_area_features, arg_output_path, cluster_tolerance=None):
 		# TODO: if the user has passed in vanilla string paths as arguments... we sould make sure they are real paths or the .filename() call below will fail
 		arg_output_path = Path(arg_output_path)
-		clip_features = Path(clip_features)
+		clip_area_features = Path(clip_area_features)
 		thou_shalt(
-			"Clip %s using %s into %s" % (self.filename(), clip_features.filename(), arg_output_path.filename()),
-			lambda: arcpy.Clip_analysis(str(self), str(clip_features), str(arg_output_path), cluster_tolerance)
+			"Clip %s using %s into %s" % (self.filename(), clip_area_features.filename(), arg_output_path.filename()),
+			lambda: arcpy.Clip_analysis(str(self), str(clip_area_features), str(arg_output_path), cluster_tolerance)
 		)
 		return self
-
+	
+	def arcpy_clip_from(self, clip_area_features, arg_input_path, cluster_tolerance=None):
+		# TODO: if the user has passed in vanilla string paths as arguments... we sould make sure they are real paths or the .filename() call below will fail
+		arg_input_path = Path(arg_input_path)
+		clip_area_features = Path(clip_area_features)
+		thou_shalt(
+			"Clip %s using %s into %s" % (arg_input_path.filename(), clip_area_features.filename(), self.filename()),
+			lambda: arcpy.Clip_analysis( str(arg_input_path), str(clip_area_features),str(self), cluster_tolerance)
+		)
+		return self
+	
 	def arcpy_buffer_to(self, arg_output_path, buffer_distance_or_field="20 Meters", dissolve_option="ALL"):
 		arg_output_path = Path(arg_output_path)
 		thou_shalt(
@@ -186,7 +196,7 @@ class Path(object):
 	def arcpy_buffer_from(self, arg_input_path, buffer_distance_or_field="20 Meters", dissolve_option="ALL"):
 		arg_input_path = Path(arg_input_path)
 		thou_shalt(
-			"Buffer {} by {} into {} with dissolve={}".format(self.filename(), buffer_distance_or_field, arg_input_path.filename(), dissolve_option),
+			"Buffer {} by {} into {} with dissolve={}".format(arg_input_path.filename(), buffer_distance_or_field, self.filename(), dissolve_option),
 			lambda: arcpy.Buffer_analysis(str(arg_input_path), str(self), buffer_distance_or_field, dissolve_option=dissolve_option)
 		)
 		return self
