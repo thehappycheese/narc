@@ -4,6 +4,7 @@ import arcpy
 import __thou_shalt__
 from .__thou_shalt__ import thou_shalt
 from .__sanitize_feature_class_name__ import sanitize_feature_class_name
+from functools import wraps
 
 
 class ARCPY_DATA_TYPE:
@@ -134,16 +135,22 @@ class Path(object):
 	def arcpy_select_to(self, arg_output_path, where_clause):
 		arg_output_path = Path(arg_output_path)
 		thou_shalt(
-			"Select from\n\t\t%s into\n\t\t%s\n\t\twhere %s" % (self.shortened_name_with_context(), arg_output_path.shortened_name_with_context(),where_clause),
-			lambda:arcpy.Select_analysis(self._path, str(arg_output_path), where_clause=where_clause)
+			"Select from\n\t\t%s into\n\t\t%s\n\t\twhere %s" % (self.shortened_name_with_context(), arg_output_path.shortened_name_with_context(), where_clause),
+			lambda: arcpy.Select_analysis(
+				in_features=self._path,
+				out_feature_class=str(arg_output_path),
+				where_clause=where_clause)
 		)
 		return self
 
 	def arcpy_select_from(self, arg_input_path, where_clause):
 		arg_input_path = Path(arg_input_path)
 		thou_shalt(
-			"Select from\n\t\t%s INTO\n\t\t%s WHERE\n\t\t%s"%(arg_input_path.shortened_name_with_context(),self.shortened_name_with_context(),where_clause),
-			lambda:arcpy.Select_analysis(str(arg_input_path), str(self), where_clause=where_clause)
+			"Select from\n\t\t%s INTO\n\t\t%s WHERE\n\t\t%s" % (arg_input_path.shortened_name_with_context(), self.shortened_name_with_context(), where_clause),
+			lambda: arcpy.Select_analysis(
+				in_features=str(arg_input_path),
+				out_feature_class=str(self),
+				where_clause=where_clause)
 		)
 		return self
 	
@@ -317,7 +324,7 @@ class Path(object):
 			field_dict = {name: index for index, name in enumerate(field_name_list)}
 			with arcpy.da.UpdateCursor(str(self), field_name_list) as cursor:  # pylint: disable=no-member
 				for row in cursor:
-					lambda_process_row(row, cursor, field_dict)
+					row = lambda_process_row(row, cursor, field_dict)
 					cursor.updateRow(row)
 		thou_shalt("Execute code on column list %s of %s" % (str(field_name_list), self.shortened_name_with_context()),
 			lambda: arcpy_call(field_name_list, lambda_process_row)
@@ -338,15 +345,17 @@ class Path(object):
 		)
 		return self
 	
-	def arcpy_linear_reference_to_table(self, arg_features_to_locate, arg_inmem_output_table_name, radius="200 Meters", field_name_route="ROAD", output_field_name_route_match="MCH_ROAD", output_feature_type="POINT", output_field_name_distance_measure="TRUE_DIST"):
+	def arcpy_linear_reference_to_table(self, arg_features_to_locate, arg_inmem_output_table_name, radius="200 Meters", locate_on_every_route="ALL", field_name_route="ROAD", output_field_name_route_match="ROAD", output_feature_type="POINT", output_field_name_distance_measure="TRUE_DIST"):
 		"""To be called on the route feature
-		:param field_name_route: is the field in this dataset that uniquly identifies the routes."""
+		:param field_name_route: is the field in this dataset that uniquly identifies the routes.
+		:param locate_on_every_route: ALL or FIRST."""
 		thou_shalt("Locate Features along routes", #TODO: nice print
 			lambda: arcpy.LocateFeaturesAlongRoutes_lr(
 				in_features=str(arg_features_to_locate),
 				in_routes=str(self),
 				route_id_field=field_name_route,
 				radius_or_tolerance=radius,
+				route_locations=locate_on_every_route,
 				out_table=str(arg_inmem_output_table_name),
 				out_event_properties=' '.join([output_field_name_route_match, output_feature_type, output_field_name_distance_measure])
 			)

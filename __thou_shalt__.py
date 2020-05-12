@@ -30,7 +30,7 @@ def thou_shalt(str_commandment_description, lambda_commandment, execute_on_dry_r
 		else:
 			sleep(0.01)
 	except arcpy.ExecuteError as e:
-		print "ARCPY HATH SINNED! COMMANDMENT "+str(COMMANDMENT_NUMBER)+" hath been broken: Thou hath not "+str_commandment_description
+		print "ARCPY HATH FAILED! COMMANDMENT "+str(COMMANDMENT_NUMBER) + " BROKEN: "+str_commandment_description
 		print e.message
 		error_counter = 1
 		flag_not_fulfilled = True
@@ -40,17 +40,17 @@ def thou_shalt(str_commandment_description, lambda_commandment, execute_on_dry_r
 				# try again
 				lambda_commandment()
 				# success
-				print "arcpy hath repented. all sins are fogiven"
+				print "arcpy hath repented."
 				flag_not_fulfilled = False
 			except:
 				error_counter +=1
 				if error_counter>10:
-					print "ARCPY HATH SINNED! COMMANDMENT "+str(COMMANDMENT_NUMBER)+" hath been broken: Thou hath not "+str_commandment_description
+					print "ARCPY HATH FAILED! COMMANDMENT "+str(COMMANDMENT_NUMBER)+" BROKEN: "+str_commandment_description
 					print e.message
 				print "Retrying: "+str(error_counter)
 				
 		if flag_not_fulfilled:
-			print "ARCPY, THINE SINS ARE BEYOND MEASURE, THY SOUL WITHOUT REPENT, I STRIKE YEE DOWN AND UNLOAD YEE FROM MEMORY"
+			print "ARCPY, THINE FAILS ARE BEYOND MEASURE, THY SOUL WITHOUT REPENT, I STRIKE YEE DOWN AND UNLOAD YEE FROM MEMORY"
 			print("quitting now")
 			quit()
 			#print "JUDGEMENT DAY IS UPON YEE, ALL SHALL NOW BE DESTROYED AND REBORN IN A NEW PROCESS / THREAD"
